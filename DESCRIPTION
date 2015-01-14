@@ -1,0 +1,11 @@
+Package: mvmstan
+Type: Package
+Title: Simplifies specification of (multivariate) mixture models in Stan (mc-stan.org).
+Version: 0.1
+Date: 2015-01-14
+Author: Pavel Logacev <pavel.logacev@gmail.com>
+Maintainer: Pavel Logacev <pavel.logacev@gmail.com>
+Description: mvmstan lets you specify a graphical model of a mixture and translates it into Stan code.
+License: CC1.0
+Depends: sets, Rgraphviz, plyr, dplyr
+
