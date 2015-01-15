@@ -6,14 +6,24 @@
   .format_block('data', lines)
 }
 
-.generate_code_par <- function(par_vars, raneff_vars) {
-  raneff_lines <- lapply(names(raneff_vars), function(parameter_name) {
-    sprintf("real %s_%s[n_%s]", parameter_name, raneff_vars[[parameter_name]], raneff_vars[[parameter_name]])
+.generate_code_par <- function(par_vars, ranef_vars) {
+  ranef_lines <- lapply(names(ranef_vars), function(parameter_name) {
+    ranef_vector <- sprintf("vector[n_%s] %s_%s", ranef_vars[[parameter_name]], parameter_name, ranef_vars[[parameter_name]])
+    ranef_sd <- sprintf("real<lower=0> %s_%s_sd", parameter_name, ranef_vars[[parameter_name]])
+    c(ranef_vector, ranef_sd)
   })
-  raneff_lines <- unlist(raneff_lines)
+  ranef_lines <- unlist(ranef_lines)
   fixedeff_lines <- sprintf("%s %s", par_vars, names(par_vars))
-  lines <- c(fixedeff_lines, raneff_lines)
+  lines <- c(fixedeff_lines, ranef_lines)
   .format_block('parameters', lines)
+}
+
+
+.generate_code_likHyperpar <- function(ranef_vars) {
+  res <- lapply(names(ranef_vars), function(parameter_name) {
+    sprintf("%s_%s ~ normal(0, %s_%s_sd)", parameter_name, ranef_vars[[parameter_name]], parameter_name, ranef_vars[[parameter_name]])
+  })
+  unlist(res)
 }
 
 
@@ -107,13 +117,18 @@
 }
 
 
-.check_variables <- function(branch_conditions, branch_cprob, branch_code, par_vars, iv_vars, dv_vars, logLik, ranEff)
+.check_variables <- function(branch_conditions, branch_cprob, branch_code, par_vars, iv_vars, dv_vars, logLik, ranef)
 {
   lhs_expr = unique( sapply(unlist(branch_code), function(eq) eq[[2]]) )
   lhs_vars = as.character(lhs_expr)
   
   all_symbols = unique(.serialize_expression( unlist(c(branch_code,branch_cprob,branch_conditions)) ))
   all_vars =  setdiff(all_symbols, all_operators)
+#  all_vars = c(names(par_vars), names(iv_vars), names(dv_vars)) 
+#  if(!all(all_expr_vars %in%  all_vars)) {
+#    stop(sprintf("Type of variables in the model was not specified for: %s.", paste(all_expr_vars[!(all_expr_vars %in% all_vars)], collapse=", ")))
+#  }
+  
   rhs_vars = setdiff(all_vars, lhs_vars)
   
   if( !setequal(c(names(par_vars),names(iv_vars),names(dv_vars)), rhs_vars) ) {
@@ -137,8 +152,13 @@
     #}
   }
   
+  all_vars = unique(c(all_vars, names(par_vars), names(iv_vars), names(dv_vars)))
+
   # find out what the random effects level variables are, and add them to the rest
-  ran_eff_vars = lapply(ranEff, function(expr) setdiff(.harvest_terminals(expr),all_vars) )
+  ran_eff_vars = lapply(ranef, function(expr) { 
+    #print(list(expr, setdiff(.harvest_terminals(expr), all_vars), .harvest_terminals(expr), sort(all_vars))); 
+    setdiff(.harvest_terminals(expr), all_vars)
+  })
   
   list(all=all_vars, lhs=lhs_vars, rhs=rhs_vars, ran_eff=ran_eff_vars,
        par=names(par_vars), data=c(names(iv_vars),names(dv_vars)) )

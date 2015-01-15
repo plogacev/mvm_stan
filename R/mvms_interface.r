@@ -83,6 +83,7 @@ plot_mvm <- function(d, show_prob=TRUE, show_code=FALSE, fname_dot=NULL, start_x
   }
 }
 
+# TODO: Make sure that the variable of interest occurs on both sides (right and left) in the random effect specifications
 
 mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, file=NULL)
 {
@@ -150,10 +151,11 @@ mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, fil
   # format the for loop block
   model_body <- .format_block('for(i_obs in 1:n_obs)', c(raneff_definitions, model_body))
   
+  hyperpar_likelihood_lines <- .generate_code_likHyperpar(vars$ran_eff)
+  
   # format the entire model block
-  code_section_model <- .format_block('model', c(model_header_lines, model_body))
-  
-  
+  code_section_model <- .format_block('model', c(model_header_lines, model_body, hyperpar_likelihood_lines))  
+    
   ####### prepare 'data' section
   raneff_n_vars <- sprintf("n_%s", raneff_grouping_vars)
   raneff_data_vars <- sprintf('int<lower=1,upper=n_%s>', raneff_grouping_vars);
