@@ -153,11 +153,13 @@
   }
   
   all_vars = unique(c(all_vars, names(par_vars), names(iv_vars), names(dv_vars)))
+#print(all_vars)
 
   # find out what the random effects level variables are, and add them to the rest
   ran_eff_vars = lapply(ranef, function(expr) { 
     #print(list(expr, setdiff(.harvest_terminals(expr), all_vars), .harvest_terminals(expr), sort(all_vars))); 
     setdiff(.harvest_terminals(expr), all_vars)
+    print( setdiff(.harvest_terminals(expr), all_vars) )
   })
   
   list(all=all_vars, lhs=lhs_vars, rhs=rhs_vars, ran_eff=ran_eff_vars,
