@@ -23,6 +23,26 @@ all_operators = c('=', '<-', '+', '-', '*',  '/', '(','==', '!=', '&&', '||')
   })
 }
 
+strlen <- function (str) {
+    length(strsplit(as.character(str), split = "")[[1]])
+}
+
+nmap <- function (vec, fromto, cast = I) {
+	cast(map(vec, names(fromto), fromto))
+}
+
+map <- function (vec, from, to, verbose = F) {
+    newVec <- vec
+    for (i in 1:length(from)) {
+        if (verbose) {
+            print(from[i])
+        }
+        newVec[vec == from[i]] <- to[i]
+    }
+    return(newVec)
+}
+
+
 read_mvm <- function(fname) {
   d <- read.table(fname, header=T, as.is=T, comment.char = "#", fill=TRUE)
   while(ncol(d) > 5) {
