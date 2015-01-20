@@ -1,0 +1,13 @@
+parent _ child prob 		code
+
+start  -> EV  iv_ev==1  
+start  -> MV  iv_ev==0
+
+EV  -> R_EV   R     mu=muB+muR;sigma=sigmaB+sigmaR  # retrieval in EV
+EV  -> NR     1-R   pY=G                          # no retrieval
+
+MV  -> R_MV   R     pY=(iv_yes==1);mu=muB+muR;sigma=sigmaB+sigmaR  # retrieval in MV
+MV  -> NR     1-R                                                  # no retrieval, no need for code here because transitions to the same state automatically get the same code
+
+R_EV -> CR_EV C     pY=(iv_yes==1) # correct retrieval in EV
+R_EV -> IR_EV 1-C   pY=(iv_yes==0) # incorrect retrieval in EV
