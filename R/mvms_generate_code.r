@@ -161,7 +161,8 @@
     #print( setdiff(.harvest_terminals(expr), all_vars) )
     setdiff(.harvest_terminals(expr), all_vars)
   })
-  
+#print(ran_eff_vars)  
+
   list(all=all_vars, lhs=lhs_vars, rhs=rhs_vars, ran_eff=ran_eff_vars,
        par=names(par_vars), data=c(names(iv_vars),names(dv_vars)) )
 }
