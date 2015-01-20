@@ -10,7 +10,7 @@ mvmstan simplifies the specification of multivariate mixture models in Stan (mc-
 ## 2. Install mvmstan in R
  	install.packages("devtools")
  	library(devtools)
- 	install_github("plogacev/mvm_stan")
+ 	install_github("plogacev/mvmstan")
 or
  - download the zip archive
  - install the package from the zip file
