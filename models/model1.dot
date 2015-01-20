@@ -1,0 +1,30 @@
+digraph foo {
+	graph [bgcolor=transparent, fontcolor=black, ratio=fill, splines=TRUE, rank=same, size="6.99,6.99", rankdir=TB];
+	node [label="\N", shape=circle, fixedsize=TRUE, fillcolor=transparent, color=black, fontcolor=black, fontsize=14, height="0.5", width="0.75"];
+	edge [headport=center, color=black, dir=none, weight="1.0", fontcolor=black, arrowhead=none, arrowtail=none, fontsize=14, labelfontsize=11, arrowsize=1, style=solid, minlen=1];
+	graph [bb="0 0 506 503"];
+	R_EV [label=R_EV];
+	start [label=start, shape=box];
+	EV [label=EV];
+	MV [label=MV];
+	CR_EV [label=CR_EV];
+	IR_EV [label=IR_EV];
+	NR [label=NR];
+	R_MV [label=R_MV];
+	R_EV -> CR_EV:center [dir=forward, weight=1, label="C
+ [ pY=(iv_yes==1) ]", arrowhead=open, fontsize=12];
+	R_EV -> IR_EV:center [dir=forward, weight=1, label="1-C
+ [ pY=(iv_yes==0) ]", arrowhead=open, fontsize=12];
+	start -> EV:center [dir=forward, weight=1, label="iv_ev==1
+ [  ]", arrowhead=open, fontsize=12];
+	start -> MV:center [dir=forward, weight=1, label="iv_ev==0
+ [  ]", arrowhead=open, fontsize=12];
+	EV -> NR:center [dir=forward, weight=1, label="1-R
+ [ pY=G ]", arrowhead=open, fontsize=12];
+	EV -> R_EV:center [dir=forward, weight=1, label="R
+ [  ]", arrowhead=open, fontsize=12];
+	MV -> NR:center [dir=forward, weight=1, label="1-R
+ [ pY=G ]", arrowhead=open, fontsize=12];
+	MV -> R_MV:center [dir=forward, weight=1, label="R
+ [ pY=(iv_yes==1) ]", arrowhead=open, fontsize=12];
+}
