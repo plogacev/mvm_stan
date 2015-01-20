@@ -7,5 +7,5 @@ Author: Pavel Logacev <pavel.logacev@gmail.com>
 Maintainer: Pavel Logacev <pavel.logacev@gmail.com>
 Description: mvmstan lets you specify a graphical model of a mixture and translates it into Stan code.
 License: CC1.0
-Depends: sets, Rgraphviz, plyr, dplyr
+Depends: Rgraphviz, plyr, dplyr
 

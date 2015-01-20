@@ -120,12 +120,16 @@ mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, fil
   # check variable consistency
   vars = .check_variables(branch_conditions, branch_cprob, branch_code, par_vars, iv_vars, dv_vars, logLik, raneff)
 
+  add_indices <- function(code) .append_to_symbol(code, vars$data, '[i_obs]')
+  substitute_transformed_vars <- function(code) .modify_symbol(code, names(raneff), sprintf('cur_%s', names(raneff)))
+  
   # add indices to all vector variables
-  model_yield$condition <- .append_to_symbol(model_yield$condition, vars$data, '[i_obs]')
-  model_yield$prob <- .append_to_symbol(model_yield$prob, vars$data, '[i_obs]')  %>% 
-                      .modify_symbol(names(raneff), sprintf('cur_%s', names(raneff)))
-  model_yield$code <- .append_to_symbol(model_yield$code, vars$data, '[i_obs]') %>% 
-                      .modify_symbol(names(raneff), sprintf('cur_%s', names(raneff)))
+  model_yield$condition <- add_indices(model_yield$condition)
+  model_yield$prob <- add_indices(model_yield$prob)  %>%  substitute_transformed_vars
+  model_yield$code <- add_indices(model_yield$code)  %>%  substitute_transformed_vars
+  
+  raneff <- add_indices(raneff)
+  #print(raneff)
   
   logLik <- .append_to_symbol(logLik, vars$data, '[i_obs]') %>% paste0
   
@@ -151,7 +155,7 @@ mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, fil
       
       assignments <- m$code[idx] %>% gsub(";[ \t]*", ";", .) %>% strsplit(, split=";")
       assign_logLik <- sprintf("logLik[%d] <- logProb_path + %s", idx, paste(logLik, collapse=" + ") )
-      c(header_path, prob, assignments, assign_logLik)
+      c(header_path, assignments, prob, assign_logLik)
     })
     incr_logLik <- "\nincrement_log_prob(log_sum_exp(logLik))"
     condition <- sprintf("if(%s)", m$condition[1])

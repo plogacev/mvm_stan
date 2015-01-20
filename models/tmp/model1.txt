@@ -1,0 +1,10 @@
+parent _ child 		prob 		code
+
+start  -> C1 		iv_amb==1
+start  -> C2		iv_amb==0
+
+C1 -> M1			p_m1_c1 	pY=p_yes_m1;mu1=mu11
+C1 -> M2			1-p_m1_c1	pY=p_yes_m2;mu1=mu12
+
+C2 -> M1			p_m1_c2
+C2 -> M2			1-p_m1_c2

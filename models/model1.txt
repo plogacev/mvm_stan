@@ -1,6 +1,8 @@
 parent _ child prob 		code
 
-start  -> EV  iv_ev==1
+start0 -> start 1     R=R_low+R_diff*iv_high_interference;C=C_low+C_diff*iv_high_interference;G=G_low+G_diff*iv_high_interference
+
+start  -> EV  iv_ev==1  
 start  -> MV  iv_ev==0
 
 EV  -> R_EV   R               # retrieval in EV

@@ -1,0 +1,31 @@
+digraph foo {
+	graph [bgcolor=transparent, fontcolor=black, ratio=fill, splines=TRUE, rank=same, size="6.99,6.99", rankdir=TB];
+	node [label="\N", shape=circle, fixedsize=TRUE, fillcolor=transparent, color=black, fontcolor=black, fontsize=14, height="0.5", width="0.75"];
+	edge [headport=center, color=black, dir=none, weight="1.0", fontcolor=black, arrowhead=none, arrowtail=none, fontsize=14, labelfontsize=11, arrowsize=1, style=solid, minlen=1];
+	graph [bb="0 0 503 503"];
+	start [label=start, shape=box];
+	N1 [label=N1];
+	N2 [label=N2];
+	USPEC [label=USPEC];
+	cAMB [label=cAMB];
+	cN1 [label=cN1];
+	cN2 [label=cN2];
+	start0 [label=start0];
+	GUESS [label=GUESS];
+	resp_N1 [label=resp_N1];
+	resp_N2 [label=resp_N2];
+	start -> cAMB:center [dir=forward, weight=1, label="iv_cond==0", arrowhead=open, fontsize=12];
+	start -> cN1:center [dir=forward, weight=1, label="iv_cond==1", arrowhead=open, fontsize=12];
+	start -> cN2:center [dir=forward, weight=1, label="iv_cond==2", arrowhead=open, fontsize=12];
+	N1 -> GUESS:center [dir=forward, weight=1, label=p_retrieval_fail, arrowhead=open, fontsize=12];
+	N1 -> resp_N1:center [dir=forward, weight=1, label="1-p_retrieval_fail", arrowhead=open, fontsize=12];
+	N2 -> GUESS:center [dir=forward, weight=1, label=p_retrieval_fail, arrowhead=open, fontsize=12];
+	N2 -> resp_N2:center [dir=forward, weight=1, label="1-p_retrieval_fail", arrowhead=open, fontsize=12];
+	USPEC -> GUESS:center [dir=forward, weight=1, label=1, arrowhead=open, fontsize=12];
+	cAMB -> N1:center [dir=forward, weight=1, label="(1-p_uspec)*p_att_n1", arrowhead=open, fontsize=12];
+	cAMB -> N2:center [dir=forward, weight=1, label="(1-p_uspec)*(1-p_att_n1)", arrowhead=open, fontsize=12];
+	cAMB -> USPEC:center [dir=forward, weight=1, label=p_uspec, arrowhead=open, fontsize=12];
+	cN1 -> N1:center [dir=forward, weight=1, label=1, arrowhead=open, fontsize=12];
+	cN2 -> N2:center [dir=forward, weight=1, label=1, arrowhead=open, fontsize=12];
+	start0 -> start:center [dir=forward, weight=1, label=1, arrowhead=open, fontsize=12];
+}

@@ -138,10 +138,11 @@
     extra_in_dv_vars <- setdiff( names(dv_vars), rhs_vars )
     
     if(length(extra_in_model) > 0) {
-      stop(sprintf("Type of variables in the model was not specified: %s.", paste(extra_in_model, collapse=',') ))
-    } else if(length(extra_in_iv_vars) > 0) {
-      stop(sprintf("Variables in iv_vars do not exist in the model: %s.", paste(extra_in_iv_vars, collapse=',') ))
-    }
+      stop(sprintf("Type of variable in the model was not specified for: %s.", paste(extra_in_model, collapse=',') ))
+    } 
+    #else if(length(extra_in_iv_vars) > 0) {
+    #  stop(sprintf("Variables in iv_vars do not exist in the model: %s.", paste(extra_in_iv_vars, collapse=',') ))
+    #}
     #
     #else if(length(extra_in_par_vars) > 0) {
     #  stop(sprintf("Variables in par_vars do not exist in the model: %s.", paste(extra_in_par_vars, collapse=',') ))
@@ -157,9 +158,8 @@
 
   # find out what the random effects level variables are, and add them to the rest
   ran_eff_vars = lapply(ranef, function(expr) { 
-    #print(list(expr, setdiff(.harvest_terminals(expr), all_vars), .harvest_terminals(expr), sort(all_vars))); 
+    #print( setdiff(.harvest_terminals(expr), all_vars) )
     setdiff(.harvest_terminals(expr), all_vars)
-    print( setdiff(.harvest_terminals(expr), all_vars) )
   })
   
   list(all=all_vars, lhs=lhs_vars, rhs=rhs_vars, ran_eff=ran_eff_vars,

@@ -1,0 +1,19 @@
+parent _ child 		prob 		code
+
+start0 -> start     1 				reading_shape=alpha0*crit_region_cnt;response_shape=beta0
+start  -> cAMB		iv_cond==0
+start  -> cN1 		iv_cond==1
+start  -> cN2		iv_cond==2
+
+cN1 -> N1 			1 					
+cN2 -> N2 			1
+cAMB -> USPEC 		p_uspec
+cAMB -> N1 			(1-p_uspec)*p_att_n1 		reading_shape=reading_shape+alpha1+alpha2
+cAMB -> N2 			(1-p_uspec)*(1-p_att_n1) 	reading_shape=reading_shape+alpha1
+
+N1 -> GUESS 		p_retrieval_fail	pY=p_guess_yes;response_shape=response_shape+beta1
+N2 -> GUESS 		p_retrieval_fail	
+USPEC -> GUESS 		1
+
+N1 -> resp_N1 		1-p_retrieval_fail	pY=(iv_questN1==1)
+N2 -> resp_N2		1-p_retrieval_fail  pY=(iv_questN1==0)
