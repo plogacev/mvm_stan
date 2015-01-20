@@ -11,9 +11,12 @@ data
 
 parameters
 {
-	real<lower=0,upper=1> R;
-	real<lower=0,upper=1> C;
-	real<lower=0,upper=1> G;
+	real R;
+	real C;
+	real G;
+	real R_diff;
+	real C_diff;
+	real G_diff;
 	vector[n_subj] R_subj;
 	real<lower=0> R_subj_sd;
 	vector[n_subj] C_subj;
@@ -36,9 +39,9 @@ model
 	for(i_obs in 1:n_obs)
 	{
 		cur_subj <- subj[i_obs];
-		cur_R <- inv_logit(logit(R) + R_subj[cur_subj]);
-		cur_C <- inv_logit(logit(C) + C_subj[cur_subj]);
-		cur_G <- inv_logit(logit(G) + G_subj[cur_subj]);
+		cur_R <- inv_logit(R + R_diff + R_subj[cur_subj]);
+		cur_C <- inv_logit(C + C_diff + C_subj[cur_subj]);
+		cur_G <- inv_logit(G + G_diff + G_subj[cur_subj]);
 		
 		if(iv_ev[i_obs] == 0)
 		{

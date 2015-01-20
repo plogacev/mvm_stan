@@ -14,18 +14,17 @@ plot_mvm(m, show_prob = T, show_code = T, fname_dot="./model1.dot", start_xdot =
 ### Declare variables and log-likelihood functions to be used in the stan model
 
 # independent variables
-iv_vars = c(iv_ev='int<lower=0,upper=1>',iv_yes='int<lower=0,upper=1>')
+iv_vars = c(iv_ev='int<lower=0,upper=1>', iv_yes='int<lower=0,upper=1>')
 
 # dependent variables
 dv_vars = c(response_yes='int<lower=0,upper=1>')
 
 # parameters to be estimated
-par_vars = c(R='real<lower=0,upper=1>', 
-             C='real<lower=0,upper=1>',
-             G='real<lower=0,upper=1>')
+par_vars = c(R='real', C='real', G='real',
+             R_diff='real', C_diff='real', G_diff='real')
 
 # relationship between variables assigned in the model and the log-likelihood of the DVs
-logLik = c(response='bernoulli_log(response_yes, pY)')
+logLik = c(response='bernoulli_log(response_yes, pY )')
 
 
 
@@ -33,12 +32,16 @@ logLik = c(response='bernoulli_log(response_yes, pY)')
 ### Generate Stan code for the model
 
 # simple model (no random effects)
-mvm_generate_code(m, iv_vars=iv_vars, par_vars=par_vars, dv_vars=dv_vars, logLik=logLik, raneff=c(), file="./model1_simple.stan")
+transforms = c(R = 'inv_logit( R + R_diff)', 
+               C = 'inv_logit( C + C_diff)',
+               G = 'inv_logit( C + G_diff)'
+)
+mvm_generate_code(m, iv_vars=iv_vars, par_vars=par_vars, dv_vars=dv_vars, logLik=logLik, raneff=transforms, file="./model1_simple.stan")
 
 # now let's add random effects (all by-subject)
-raneff = c(R = 'inv_logit( logit(R) + subj)', 
-           C = 'inv_logit( logit(C) + subj)',
-           G = 'inv_logit( logit(G) + subj)'
+raneff = c(R = 'inv_logit( R + R_diff + subj)', 
+           C = 'inv_logit( C + C_diff + subj)',
+           G = 'inv_logit( G + G_diff + subj)'
 )
 
 # model with random effects
