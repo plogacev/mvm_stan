@@ -8,7 +8,7 @@ mvmstan simplifies the specification of multivariate mixture models in Stan (mc-
  	biocLite("Rgraphviz")
 
 ## 2. Install mvmstan in R
- 	library(devtools)
+ 	if(!require("devtools")) install.packages("devtools")
  	install_github("plogacev/mvmstan")
 or
  - download the zip archive
