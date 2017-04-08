@@ -47,8 +47,8 @@
     for(j in 1:length(cur_res)) {
       cur_res[[j]] <- with(cur_res[[j]], 
                            if(cur_child$is_logical)
-                             list(path=c(root_id, path), code=c(cur_child$code, code),
-                                  prob=prob, condition=c(cur_child$prob, condition))
+                              list(path=c(root_id, path), code=c(cur_child$code, code),
+                                   prob=prob, condition=c(cur_child$prob, condition))
                            else
                              list(path=c(root_id, path), code=c(cur_child$code, code),
                                   prob=c(cur_child$prob, prob), condition=condition)
@@ -59,7 +59,8 @@
   res
 }
 
-.model_reshape_code <- function(yield) {
+.model_reshape_code <- function(yield)
+{
   ldply(yield, function(y) {
     path <- paste(y$path, collapse='-')
     condition <- paste(y$condition, collapse=' && ')
@@ -74,7 +75,7 @@
 .format_lines <- function(lines, indentation=0) {
   indentation <- paste0(rep('\t', indentation), collapse="")
   lines <- gsub('\n', paste('\n', indentation, sep=""), lines)
-  lines <- paste(indentation, lines, ';', sep='')
+  lines <- paste(indentation, lines, ifelse(grepl(";$", lines), "", ";"), sep='')
 }
 
 .format_block <- function(section, lines, indentation=0) {
@@ -87,18 +88,24 @@
   .circumfix_symbol(lst=lst, symbols=symbols, prefix='', suffix=suffix)
 }
 
-.circumfix_symbol <- function(lst, symbols, prefix, suffix) {
-  if(typeof(lst) == "character") {
-    ret <- lapply(lst, function(cur_lst) as.list(parse(text=cur_lst)) %>% .circumfix_symbol(symbols=symbols, prefix=prefix, suffix=suffix) %>% paste(., collapse="; ") )
+.circumfix_symbol <- function(lst, symbols, prefix, suffix)
+{
+  if(typeof(lst) == "character")
+  {
+    ret <- lapply(lst, function(cur_lst) as.list(parse(text=cur_lst)) %>% 
+                    .circumfix_symbol(symbols=symbols, prefix=prefix, suffix=suffix) %>% 
+                    paste(., collapse="; ") )
     return(unlist(ret))
   }
   
   if(is.null(lst) || length(lst) == 0)
     return(lst)
   
-  if(typeof(lst) == "symbol") {
+  if(typeof(lst) == "symbol")
+  {
     if(lst == "=")
-      return( as.symbol('<-') )
+      return( as.symbol('=') )
+    
     if(as.character(lst) %in% symbols) {
       res <- parse(text=paste0(prefix,lst,suffix))[[1]]
       return( res )  
@@ -181,7 +188,7 @@
   
   if(typeof(lst) == "symbol") {
     if(lst == "=")
-      return( as.symbol('<-') )
+      return( as.symbol('=') )
     if(as.character(lst) %in% symbols_from) {
       new_symbol <- symbols_to[which(as.character(lst) == symbols_from)]
       res <- parse(text=new_symbol)[[1]]

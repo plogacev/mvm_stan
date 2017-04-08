@@ -107,13 +107,12 @@ plot_mvm <- function(d, show_prob=TRUE, show_code=FALSE, fname_dot=NULL, start_x
 
 mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, file=NULL)
 {
-  
-  ####### prepare 'model' section
+  ### prepare 'model' section
   model_yield <- .model_harvest_code(m)
   model_yield <- .model_reshape_code(model_yield)
   
   # TODO: rename 'code' column to 'assignmens'
-  branch_conditions = lapply(model_yield$condition, function(condition) as.list(parse(text=condition)))
+  branch_conditions = lapply(model_yield$condition, function(condition) as.list(parse(text=condition))) # remove processing of conditions at this point
   branch_cprob = lapply(model_yield$prob, function(code) as.list(parse(text=code)))
   branch_code = lapply(model_yield$code, function(code) as.list(parse(text=code)))
 
@@ -140,45 +139,67 @@ mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, fil
   raneff_indices <- sprintf("int cur_%s", raneff_grouping_vars);
   raneff_declarations <- c(raneff_affected_vars, raneff_indices)
   
-  # create model header
-  model_header_lines <- c('int i', 'real prob_trial_type', 'real logProb_path', sprintf("real %s", vars$lhs), raneff_declarations)
-
-  model_body <- dlply(model_yield, .(condition), function(m) 
+  ### create model loop
+  model_loop_header <- sprintf("real logLik[%d] = logLikInit", nrow(model_yield))
+  blocks <- llply(1:nrow(model_yield), function(idx)
   {
-    condition_header <- sprintf("real logLik[%d]", nrow(m))
-    blocks <- llply(1:nrow(m), function(idx) {
-      header_path <- sprintf("\n// path: %s", m$id[idx])
-      if(m$prob[idx] == "")
-        prob <- "logProb_path <- 0"
-      else
-        prob <- sprintf("logProb_path <- log(%s)", m$prob[idx])
-      
-      assignments <- m$code[idx] %>% gsub(";[ \t]*", ";", .) %>% strsplit(, split=";")
-      assign_logLik <- sprintf("logLik[%d] <- logProb_path + %s", idx, paste(logLik, collapse=" + ") )
-      c(header_path, assignments, prob, assign_logLik)
-    })
-    incr_logLik <- "\nincrement_log_prob(log_sum_exp(logLik))"
-    condition <- sprintf("if(%s)", m$condition[1])
-    res <- .format_block(condition, c(condition_header, unlist(blocks), incr_logLik))
-  })
+    # include path name as a comment
+    header_path <- sprintf("\n// path: %s", model_yield$id[idx])
     
+    # determine path probability
+    if (model_yield$prob[idx] != "") {
+        prob <- sprintf("logProb_path = log(%s)", model_yield$prob[idx])
+    } else {
+        prob <- "logProb_path = 0" # set probability to 1, if only conditions and no probabilities were specified (corresponds to log(p) = 0)
+    }
+    
+    # TODO: Ensure that all variable names in vars$lhs are defined for every branch at this point. 
+    if (model_yield$code[idx] == "") {
+        msg <- sprintf("No assignments defined on this branch: %s.", model_yield$id[idx]);
+        stop(msg)
+    }
+    assignments <- model_yield$code[idx] %>% gsub(";[ \t]*", ";", .) %>% strsplit(., split=";")
+    assign_logLik <- sprintf("logLik[%d] = logProb_path + %s", idx, paste(logLik, collapse=" + ") )
+
+    path_lines <- .format_lines( c(header_path, prob, assignments, assign_logLik) )
+    path_block <- paste(path_lines, collapse="\n")
+    
+    # encode path conditions (logical variables are moved here instead of being included in the path probability)
+    if (model_yield$condition[idx] != "") {
+        condition <- sprintf("if (%s)", model_yield$condition[idx])
+        path_block %<>% .format_block(condition, .)
+    }
+    
+    path_block
+  })
+  
+  incr_logLik <- "\ntarget += log_sum_exp(logLik)"
+  # condition <- sprintf("if(%s)", m$condition[1])
+
+  model_lines <- .format_lines( c(model_loop_header, unlist(blocks), incr_logLik) )
+  model_loop_body <- paste(model_lines, collapse="\n")
+
   # declare variables needed for parameters affected by random effects
-  raneff_definitions_indices <- sprintf("cur_%s <- %s[i_obs]", raneff_grouping_vars, raneff_grouping_vars);
+  raneff_definitions_indices <- sprintf("cur_%s = %s[i_obs]", raneff_grouping_vars, raneff_grouping_vars);
   
   raneff <- sapply(names(vars$ran_eff), function(parname) {
     .modify_symbol(raneff[[parname]], vars$ran_eff[[parname]], sprintf('%s_%s[cur_%s]', parname, vars$ran_eff[[parname]], vars$ran_eff[[parname]] ))
   })
   
-  raneff_definitions_vars <- sprintf("cur_%s <- %s", names(raneff), raneff);
+  raneff_definitions_vars <- sprintf("cur_%s = %s", names(raneff), raneff);
   raneff_definitions <- c(raneff_definitions_indices, raneff_definitions_vars)
   
   # format the for loop block
-  model_body <- .format_block('for(i_obs in 1:n_obs)', c(raneff_definitions, model_body))
+  model_loop_body <- .format_block('for(i_obs in 1:n_obs)', c(raneff_definitions, model_loop_body))
   
   hyperpar_likelihood_lines <- .generate_code_likHyperpar(vars$ran_eff)
   
+  # create model header
+  model_logLikInit <- sprintf("real logLikInit[%d] = {%s}", nrow(model_yield), rep("log(0)", nrow(model_yield)) %>% paste(collapse = ","))
+  model_header_lines <- c('int i', 'real logProb_path', model_logLikInit, sprintf("real %s", vars$lhs), raneff_declarations)
+
   # format the entire model block
-  code_section_model <- .format_block('model', c(model_header_lines, model_body, hyperpar_likelihood_lines))  
+  code_section_model <- .format_block('model', c(model_header_lines, model_loop_body, hyperpar_likelihood_lines))  
     
   ####### prepare 'data' section
   raneff_n_vars <- sprintf("n_%s", raneff_grouping_vars)
