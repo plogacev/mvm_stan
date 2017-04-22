@@ -43,7 +43,8 @@ map <- function (vec, from, to, verbose = F) {
 }
 
 
-read_mvm <- function(fname) {
+read_mvm <- function(fname)
+{
   d <- read.table(fname, header=T, as.is=T, comment.char = "#", fill=TRUE)
   while(ncol(d) > 5) {
     d[,5] <- paste(d[,5], d[,6])
@@ -105,7 +106,7 @@ plot_mvm <- function(d, show_prob=TRUE, show_code=FALSE, fname_dot=NULL, start_x
 
 # TODO: Make sure that the variable of interest occurs on both sides (right and left) in the random effect specifications
 
-mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, file=NULL)
+mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, file=NULL, ignore_vars = NULL)
 {
   ### prepare 'model' section
   model_yield <- .model_harvest_code(m)
@@ -117,7 +118,7 @@ mvm_generate_code <- function(m, par_vars, iv_vars, dv_vars, logLik, raneff, fil
   branch_code = lapply(model_yield$code, function(code) as.list(parse(text=code)))
 
   # check variable consistency
-  vars = .check_variables(branch_conditions, branch_cprob, branch_code, par_vars, iv_vars, dv_vars, logLik, raneff)
+  vars = .check_variables(branch_conditions, branch_cprob, branch_code, par_vars, iv_vars, dv_vars, logLik, raneff, ignore_vars = ignore_vars)
 
   add_indices <- function(code) .append_to_symbol(code, vars$data, '[i_obs]')
   substitute_transformed_vars <- function(code) .modify_symbol(code, names(raneff), sprintf('cur_%s', names(raneff)))

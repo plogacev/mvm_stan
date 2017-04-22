@@ -124,13 +124,13 @@
 }
 
 
-.check_variables <- function(branch_conditions, branch_cprob, branch_code, par_vars, iv_vars, dv_vars, logLik, ranef)
+.check_variables <- function(branch_conditions, branch_cprob, branch_code, par_vars, iv_vars, dv_vars, logLik, ranef, ignore_vars = NULL)
 {
   lhs_expr = unique( sapply(unlist(branch_code), function(eq) eq[[2]]) )
   lhs_vars = as.character(lhs_expr)
   
   all_symbols = unique(.serialize_expression( unlist(c(branch_code,branch_cprob,branch_conditions)) ))
-  all_vars =  setdiff(all_symbols, all_operators)
+  all_vars =  setdiff(all_symbols, all_operators) %>% setdiff(ignore_vars)
 #  all_vars = c(names(par_vars), names(iv_vars), names(dv_vars)) 
 #  if(!all(all_expr_vars %in%  all_vars)) {
 #    stop(sprintf("Type of variables in the model was not specified for: %s.", paste(all_expr_vars[!(all_expr_vars %in% all_vars)], collapse=", ")))
